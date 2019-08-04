@@ -4,10 +4,10 @@ import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from '../types/index'
 import xhr from './xhr'
 // 处理url格式
 import { buildURL } from '../helpers/url'
-// 处理data格式
-import { transformRequest, transformResponse } from '../helpers/data'
 // 处理headers格式
-import { processHeaders } from '../helpers/headers'
+import { flattenHeaders } from '../helpers/headers'
+// 转换
+import transfrom from './transform'
 
 // axios 请求函数
 export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromise {
@@ -16,10 +16,7 @@ export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromis
   // 发送请求
   return xhr(config).then((res: AxiosResponse) => {
     // 这里请求成功后 再做一层转换
-    // 判断用户没有传入 responseType 参数，那么默认就给服务端响应的数据转换成 对象形式
-    if (!config.responseType) {
-      return transformResponseData(res)
-    }
+    transformResponseData(res)
     return res
   })
 }
@@ -28,10 +25,10 @@ export default function dispatchRequest(config: AxiosRequestConfig): AxiosPromis
 function processConfig(config: AxiosRequestConfig): void {
   // 处理url
   config.url = transformURL(config)
-  // 处理headers
-  config.headers = transformHeaders(config)
   // 处理 data
-  config.data = transformRequestData(config)
+  config.data = transfrom(config.data, config.headers, config.transformRequest)
+  // 再处理config配置合并后的headers参数
+  config.headers = flattenHeaders(config.headers, config.method!)
 }
 
 // 转换url格式
@@ -41,20 +38,8 @@ function transformURL(config: AxiosRequestConfig): string {
   return buildURL(url!, params)
 }
 
-// 转换data格式
-function transformRequestData(config: AxiosRequestConfig): any {
-  const { data } = config
-  return transformRequest(data)
-}
-
-// 转换headers格式
-function transformHeaders(config: AxiosRequestConfig): any {
-  const { headers = {}, data } = config
-  return processHeaders(headers, data)
-}
-
 // 转换服务端响应的data数据格式
 function transformResponseData(res: AxiosResponse): AxiosResponse {
-  res.data = transformResponse(res.data)
+  res.data = transfrom(res.data, res.headers, res.config.transformResponse)
   return res
 }

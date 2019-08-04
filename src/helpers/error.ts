@@ -1,5 +1,6 @@
 import { AxiosRequestConfig, AxiosResponse } from '../types/index'
 
+// 错误类， 请求错误会返回错误类
 class AxiosError extends Error {
   isAxiosError: boolean
   config: AxiosRequestConfig

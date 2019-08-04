@@ -13,6 +13,8 @@ export function transformRequest(data: any): any {
 // 把响应的数据转换成对象形式
 export function transformResponse(data: any): any {
   if (typeof data === 'string') {
+    // 这里做一个错误的判断， 因为有的字符串类型 转不了 对象
+    // 错误 JSON.parse(""1"") JSON.parse("") JSON.parse("{a:2")
     try {
       data = JSON.parse(data)
     } catch {

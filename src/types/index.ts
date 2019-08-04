@@ -19,16 +19,26 @@ type HTTPResponseType = '' | 'arraybuffer' | 'blob' | 'document' | 'json' | 'tex
 
 // 定义的使用axios请求使用的配置
 export interface AxiosRequestConfig {
+  // 请求的url
   url?: string
   // Method 指定 传入的字符串格式
   method?: Method
+  // post... 请求的参数
   data?: any
+  // get... 请求的参数转换url
   params?: any
+  // 请求头部
   headers?: any
   // 表示服务端响应的data值， 为什么类型的
   responseType?: HTTPResponseType
   // 超时时间
   timeout?: number
+
+  transformRequest?: AxiosTransformer | AxiosTransformer[]
+  transformResponse?: AxiosTransformer | AxiosTransformer[]
+
+  // 有可能会有额外的参数传入
+  [propName: string]: any
 }
 
 // 定义的请求成功返回的接口
@@ -56,6 +66,15 @@ export interface AxiosError extends Error {
 
 // 添加混合方法接口
 export interface Axios {
+  // 拦截器接口
+  interceptors: {
+    request: AxiosInstanceptorMangger<AxiosRequestConfig>
+    response: AxiosInstanceptorMangger<AxiosResponse>
+  }
+
+  // 默认配置
+  defaults: AxiosRequestConfig
+
   // 这些就是定义 Axios方法， 也是 混合函数的方法
   request<T = any>(config: AxiosRequestConfig): AxiosPromise<T>
 
@@ -88,3 +107,26 @@ export interface AxiosInstance extends Axios {
 // axios(url, {
 //   method:'xxx',
 // })
+
+// 添加静态属性方法
+export interface AxiosStatic extends AxiosInstance {
+  create(config?: AxiosRequestConfig): AxiosInstance
+}
+
+export interface AxiosInstanceptorMangger<T> {
+  use(resolved: ResolvedFn<T>, rejected?: RejectedFn): number
+
+  eject(id: number): void
+}
+
+export interface ResolvedFn<T> {
+  (val: T): T | Promise<T>
+}
+
+export interface RejectedFn {
+  (error: any): any
+}
+
+export interface AxiosTransformer {
+  (data: any, headers?: any): any
+}

@@ -49,9 +49,36 @@ export function normalizeName(nameData: any, normalizedName: string): any {
   return nameData
 }
 
+// 拷贝
 export function extend<T, U>(to: T, from: U): T & U {
   for (const key in from) {
     ;(to as T & U)[key] = from[key] as any
   }
   return to as T & U
+}
+
+// deepMerge(...objs: any[]) 这里是把调用时传入的参数 转换成一个数组
+// deepMerge({a: 2}, {b: 3}) => [{a:2}, {b:3}]
+// deepMerge({a: 1}) => [{a: 1}]
+// 深度拷贝 递归
+export function deepMerge(...objs: any[]): any {
+  let result = Object.create(null)
+  objs.forEach(obj => {
+    if (obj) {
+      Object.keys(obj).forEach(key => {
+        const val = obj[key]
+        if (isPlainObject(val)) {
+          if (isPlainObject(result[key])) {
+            result[key] = deepMerge(result[key], val)
+          } else {
+            result[key] = deepMerge(val)
+          }
+        } else {
+          result[key] = val
+        }
+      })
+    }
+  })
+
+  return result
 }

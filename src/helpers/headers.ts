@@ -1,4 +1,5 @@
-import { isPlainObject, normalizeName } from './util'
+import { isPlainObject, normalizeName, deepMerge } from './util'
+import { Method } from '../types'
 
 // 做请求头部的参数判断
 export function processHeaders(headers: any, data: any): any {
@@ -39,4 +40,21 @@ export function parseHeaders(headers: string): Object {
   })
   // 返回 解析好的 header
   return parsed
+}
+
+export function flattenHeaders(headers: any, method: Method): any {
+  // 如果没有headers那么就直接返回
+  if (!headers) {
+    return headers
+  }
+
+  headers = deepMerge(headers.common, headers[method], headers)
+
+  // 删除默认配置的一些无用参数
+  const methodsToDelete = ['delete', 'get', 'head', 'options', 'post', 'put', 'patch', 'common']
+  methodsToDelete.forEach(key => {
+    delete headers[key]
+  })
+
+  return headers
 }
