@@ -34,8 +34,12 @@ export interface AxiosRequestConfig {
   // 超时时间
   timeout?: number
 
+  // 请求 响应 的格式转换
   transformRequest?: AxiosTransformer | AxiosTransformer[]
   transformResponse?: AxiosTransformer | AxiosTransformer[]
+
+  // 取消功能
+  cancelToken?: CancelToken
 
   // 有可能会有额外的参数传入
   [propName: string]: any
@@ -111,6 +115,10 @@ export interface AxiosInstance extends Axios {
 // 添加静态属性方法
 export interface AxiosStatic extends AxiosInstance {
   create(config?: AxiosRequestConfig): AxiosInstance
+
+  CancelToken: CancelTokenStatic
+  Cancel: CancelStatic
+  isCancel: (value: any) => boolean
 }
 
 export interface AxiosInstanceptorMangger<T> {
@@ -129,4 +137,37 @@ export interface RejectedFn {
 
 export interface AxiosTransformer {
   (data: any, headers?: any): any
+}
+
+// 取消请求接口定义
+export interface CancelToken {
+  promise: Promise<Cancel>
+  reason?: Cancel
+}
+
+export interface Canceler {
+  (message?: string): void
+}
+
+export interface CancelExecutor {
+  (cancel: Canceler): void
+}
+
+export interface CancelTokenSource {
+  token: CancelToken
+  cancel: Canceler
+}
+
+export interface CancelTokenStatic {
+  new (execoutor: CancelExecutor): CancelToken
+
+  source(): CancelTokenSource
+}
+
+export interface Cancel {
+  message?: string
+}
+
+export interface CancelStatic {
+  new (message?: string): Cancel
 }
